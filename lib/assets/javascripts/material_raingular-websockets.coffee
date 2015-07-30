@@ -1,4 +1,6 @@
 # //= require websocket_rails/main
+# //= require dateparser
+
 angular.module('WebSocket', [])
   .directive 'webSocket', ($routeParams) ->
     restrict: 'A'
@@ -17,6 +19,8 @@ angular.module('WebSocket', [])
           contentLoaded()
           parent = scope.$eval(parent_name)
           angular.dispatcher.bind parent_name + '_' + parent.id + '.change', (data) ->
-            if modelCtrl.$modelValue != data[modelName]
-              modelCtrl.$setViewValue(data[modelName])
-              modelCtrl.$render()
+            new DateParser(data).evaluate()
+            for key,value of data
+              parent[key] = value unless parent[key] == value
+            modelCtrl.$setViewValue(data[modelName])
+            modelCtrl.$render()
