@@ -4,16 +4,19 @@ angular.module('WebSocket', [])
     restrict: 'A'
     require: 'ngModel'
     link: (scope, element, attributes, modelCtrl) ->
-      wsurl = window.location.hostname
-      wsurl += ":#{window.location.port}" if window.location.port
-      wsurl += "/websocket"
-      angular.dispatcher = new WebSocketRails(wsurl)
+      unless angular.dispatcher
+        wsurl = window.location.hostname
+        wsurl += ":#{window.location.port}" if window.location.port
+        wsurl += "/websocket"
+        angular.dispatcher = new WebSocketRails(wsurl)
       parent = attributes.ngModel.split('.')
       modelName = parent.pop()
-      contentLoaded = scope.$watch parent.join('.'), (newVal) ->
+      parent_name = parent.join('.')
+      contentLoaded = scope.$watch parent_name, (newVal) ->
         if newVal
           contentLoaded()
-          parent = scope.$eval(parent.join('.'))
-          angular.dispatcher.bind 'process_group_' + parent.id + '.change', (data) ->
-            if data[modelName] && modelCtrl.$modelValue != data[modelName]
+          parent = scope.$eval(parent_name)
+          angular.dispatcher.bind parent_name + '_' + parent.id + '.change', (data) ->
+            if modelCtrl.$modelValue != data[modelName]
               modelCtrl.$setViewValue(data[modelName])
+              modelCtrl.$render()
