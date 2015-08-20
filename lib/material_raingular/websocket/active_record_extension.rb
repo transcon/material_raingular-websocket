@@ -9,7 +9,7 @@ module EmittableExtension
       after_save :emit_changes
       define_method(:emit_changes)        {WebsocketRails[websocket_namespace].trigger(:change, websocket_message) if WebsocketRails[websocket_namespace].subscribers.present?}
       define_method(:websocket_message)   {self.as_json}
-      define_method(:websocket_namespace) {"#{self.class.name.underscore}_#{self.id}".to_sym}
+      define_method(:websocket_namespace) {self.class.name.underscore.to_sym}
     end
     def emittable?() @emittable || false end
   end

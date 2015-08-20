@@ -36,9 +36,11 @@ angular.module('WebSocket', [])
         if newVal
           contentLoaded()
           parent = scope.$eval(parent_name)
-          channel = angular.dispatcher.subscribe parent_name + '_' + parent.id
-          channel.bind 'change', (data) ->
-            scope.$apply ->
-              new DateParser(data).to_s()
-              array_process(data)         if attributes.webSocket == 'array'
-              singleton_process(data) unless attributes.webSocket == 'array'
+          angular.channels = {} unless angular.channels
+          angular.channels[parent_name] = angular.dispatcher.subscribe parent_name
+          angular.channels[parent_name].bind 'change', (data) ->
+            if data.id == parent.id
+              scope.$apply ->
+                new DateParser(data).to_s()
+                array_process(data)         if attributes.webSocket == 'array'
+                singleton_process(data) unless attributes.webSocket == 'array'
