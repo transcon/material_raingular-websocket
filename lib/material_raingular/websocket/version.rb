@@ -1,5 +1,5 @@
 module MaterialRaingular
   module Websocket
-    VERSION = "0.0.2.1.alpha"
+    VERSION = "0.0.2.2.alpha"
   end
 end
