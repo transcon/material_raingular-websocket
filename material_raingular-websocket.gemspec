@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails"
   spec.add_dependency "material_raingular"
-  spec.add_dependency "websocket-rails"
+  # spec.add_dependency "websocket-rails"
   spec.add_development_dependency "flying_table"
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
