@@ -8,14 +8,24 @@ module EmittableExtension
       @emittable = true
       after_destroy :emit_destroyed
       after_save    :emit_changes
-      define_method(:emit_destroyed)      {WebsocketRails[websocket_namespace].trigger(:destroy, destroy_message)}
-      define_method(:emit_changes)        {WebsocketRails[websocket_namespace].trigger(:change, websocket_message)}
-      define_method(:websocket_message)   {self.to_json}
-      define_method(:destroy_message)     {{id: self.id}.to_json}
-      define_method(:websocket_namespace) {self.class.name.underscore.to_sym}
+      def emittable?() @emittable || false end
     end
-    def emittable?() @emittable || false end
   end
+  def emit_destroyed
+    r = Redis.new
+    token = r.hget "websocket_rails.channel_tokens", websocket_namespace
+    return unless token
+    r.publish "websocket_rails.events", [:destroy,{data: destroy_message,channel: websocket_namespace, token: token}].to_json
+  end
+  def emit_changes
+    r = Redis.new
+    token = r.hget "websocket_rails.channel_tokens", websocket_namespace
+    return unless token
+    r.publish "websocket_rails.events", [:change,{data: websocket_message,channel: websocket_namespace, token: token}].to_json
+  end
+  def websocket_message() self.to_json end
+  def destroy_message() {id: self.id}.to_json end
+  def websocket_namespace() self.class.name.underscore.to_sym end
   def emittable?() self.class.emittable? end
 end
 module UserManagerExtension
