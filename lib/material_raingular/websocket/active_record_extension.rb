@@ -1,6 +1,7 @@
 require 'rails'
 require 'active_record'
 require 'websocket-rails'
+require 'material_raingular/websocket'
 module EmittableExtension
   extend ActiveSupport::Concern
   module ClassMethods
@@ -12,16 +13,10 @@ module EmittableExtension
     end
   end
   def emit_destroyed
-    r = Redis.new
-    token = r.hget "websocket_rails.channel_tokens", websocket_namespace
-    return unless token
-    r.publish "websocket_rails.events", [:destroy,{data: destroy_message,channel: websocket_namespace, token: token}].to_json
+    MaterialRaingular::Websocket::Emitter[websocket_namespace].publish(:destroy,destroy_message)
   end
   def emit_changes
-    r = Redis.new
-    token = r.hget "websocket_rails.channel_tokens", websocket_namespace
-    return unless token
-    r.publish "websocket_rails.events", [:change,{data: websocket_message,channel: websocket_namespace, token: token}].to_json
+    MaterialRaingular::Websocket::Emitter[websocket_namespace].publish(:change,websocket_message)
   end
   def websocket_message() self.to_json end
   def destroy_message() {id: self.id}.to_json end
